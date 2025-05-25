@@ -1,3 +1,7 @@
 .tags
 tailscale-forward-auth
 echo-server
+
+.envrc
+.direnv/
+result
