@@ -15,7 +15,7 @@ import (
 	"net/url"
 	"strings"
 
-	"tailscale.com/client/tailscale"
+	"tailscale.com/client/local"
 )
 
 var (
@@ -32,6 +32,7 @@ func main() {
 		log.Fatal("listen address not set")
 	}
 
+	client := &local.Client{}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if *debug {
@@ -59,7 +60,6 @@ func main() {
 			return
 		}
 
-		client := &tailscale.LocalClient{}
 		info, err := client.WhoIs(r.Context(), remoteAddr.String())
 		if err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
