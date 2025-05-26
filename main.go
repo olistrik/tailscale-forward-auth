@@ -110,7 +110,7 @@ func main() {
 				log.Printf("can't extract tailnet name from hostname %q", info.Node.Name)
 				return
 			}
-			tailnet = strings.TrimSuffix(tailnet, ".beta.tailscale.net")
+			tailnet = strings.TrimSuffix(tailnet, ".ts.net")
 		}
 
 		expectedTailnet := r.Header.Get(*headerExpectedTailnet)
