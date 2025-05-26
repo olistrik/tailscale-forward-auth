@@ -13,18 +13,31 @@ import (
 	"net/http"
 	"net/netip"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"tailscale.com/client/local"
+	"tailscale.com/tailcfg"
 )
 
 var (
-	listenProto      = flag.String("network", "tcp", "type of network to listen on, defaults to tcp")
-	listenAddr       = flag.String("addr", "127.0.0.1:", "address to listen on, defaults to 127.0.0.1:")
-	headerRemoteIP   = flag.String("remote-ip-header", "X-Forwarded-For", "HTTP header field containing the remote IP")
-	headerRemotePort = flag.String("remote-port-header", "X-Forwarded-Port", "HTTP header field containing the remote port")
-	debug            = flag.Bool("debug", false, "enable debug logging")
+	listenProto              = flag.String("network", "tcp", "type of network to listen on, defaults to tcp")
+	listenAddr               = flag.String("addr", "127.0.0.1:", "address to listen on, defaults to 127.0.0.1:")
+	headerRemoteIP           = flag.String("remote-ip-header", "X-Forwarded-For", "HTTP header field containing the remote IP")
+	headerRemotePort         = flag.String("remote-port-header", "X-Forwarded-Port", "HTTP header field containing the remote port")
+	headerPermitPrivate      = flag.String("permit-private-header", "X-Permit-Private", "HTTP header field to permit private network connections without tailscale")
+	headerExpectedTailnet    = flag.String("expected-tailnet-header", "X-Expected-Tailnet", "HTTP header field to set expected tailnet")
+	headerRequiresCapability = flag.String("requires-capability", "X-Requires-Capability", "HTTP header field to set the required application capability")
+	debug                    = flag.Bool("debug", false, "enable debug logging")
 )
+
+func ParseBoolish(val string) (bool, error) {
+	if val != "" {
+		return false, nil
+	}
+
+	return strconv.ParseBool(val)
+}
 
 func main() {
 	flag.Parse()
@@ -60,8 +73,20 @@ func main() {
 			return
 		}
 
+		permitPrivate, err := ParseBoolish(r.Header.Get(*headerPermitPrivate))
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			log.Printf("could not parse boolean header %s", *headerPermitPrivate)
+		}
+
 		info, err := client.WhoIs(r.Context(), remoteAddr.String())
 		if err != nil {
+			if permitPrivate && remoteAddr.Addr().IsPrivate() {
+				// respond without additional headers.
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+
 			w.WriteHeader(http.StatusUnauthorized)
 			log.Printf("can't look up %s: %v", remoteAddr, err)
 			return
@@ -88,10 +113,17 @@ func main() {
 			tailnet = strings.TrimSuffix(tailnet, ".beta.tailscale.net")
 		}
 
-		if expectedTailnet := r.Header.Get("Expected-Tailnet"); expectedTailnet != "" && expectedTailnet != tailnet {
+		expectedTailnet := r.Header.Get(*headerExpectedTailnet)
+		if expectedTailnet != "" && expectedTailnet != tailnet {
 			w.WriteHeader(http.StatusForbidden)
 			log.Printf("user is part of tailnet %s, wanted: %s", tailnet, url.QueryEscape(expectedTailnet))
 			return
+		}
+
+		requiredCapability := tailcfg.PeerCapability(r.Header.Get(*headerRequiresCapability))
+		if requiredCapability != "" && !info.CapMap.HasCapability(requiredCapability) {
+			w.WriteHeader(http.StatusForbidden)
+			log.Printf("user does not have required capability: %s", requiredCapability)
 		}
 
 		h := w.Header()

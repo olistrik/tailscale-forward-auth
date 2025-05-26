@@ -1,6 +1,8 @@
 # tailscale-forward-auth
 
-This is a fork of the upstream [tailscale-forward-auth](https://github.com/kevin-hanselman/tailscale-forward-auth), to nixify and add some ASL related utils.
+This is a fork of the upstream
+[tailscale-forward-auth](https://github.com/kevin-hanselman/tailscale-forward-auth),
+to nixify and add the ability to specify required application capabilities.
 
 This is a basic example of how to implement a Tailscale authentication server
 for general use with proxies. It is derived from the [Tailscale nginx-auth
