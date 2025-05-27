@@ -6,4 +6,8 @@ pkgs.buildGo124Module {
   src = ./.;
   vendorHash = "sha256-xbR/vQ0BX0/ujJVuIcXNLAf/myiCZjGFe8sd2meaRGs=";
   excludedPackages = [ "example" ];
+
+  meta = {
+    mainProgram = "tailscale-forward-auth";
+  };
 }

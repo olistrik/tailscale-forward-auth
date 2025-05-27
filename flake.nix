@@ -17,12 +17,13 @@
         {
           packages.default = callPackage ./default.nix { };
           devShells.default = callPackage ./shell.nix { };
-          # nixosModules.default = import ./nix/module.nix;
 
         }) // {
 
       overlays.default = final: prev: {
-        tailscale-nginx-auth = self.packages.${final.system}.default;
+        tailscale-forward-auth = self.packages.${final.system}.default;
+
       };
+      nixosModules.default = import ./nixos/modules;
     };
 }
