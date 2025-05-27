@@ -105,7 +105,4 @@ in
       '';
     });
   };
-
-  meta.maintainers = with maintainers; [ phaer ];
-
 }
