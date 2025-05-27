@@ -163,8 +163,6 @@ func main() {
 		listeners = append(listeners, ln)
 	}
 
-	log.Printf("Listeners: %d", len(listeners))
-
 	if len(listeners) == 0 {
 		log.Fatal("No listeners were passed to systemd or specified using tcpAddr or sockPath.")
 	}
