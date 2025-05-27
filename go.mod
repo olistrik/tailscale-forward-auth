@@ -4,7 +4,10 @@ go 1.24.0
 
 toolchain go1.24.2
 
-require tailscale.com v1.84.0
+require (
+	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf
+	tailscale.com v1.84.0
+)
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect

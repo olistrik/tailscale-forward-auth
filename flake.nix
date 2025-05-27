@@ -10,21 +10,16 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import nixpkgs { inherit system; };
-      in
-      {
-        packages.default = pkgs.buildGo124Module {
-          pname = "tailscale-forward-auth";
-          version = "0.0.0";
-          src = ./.;
-          vendorHash = "sha256-/MZJ73XS7s035LHUPhcIOjxLcM9OZDFO4wJD+NKQzJk=";
-          excludedPackages = [ "example" ];
-        };
 
-        devShells.default = pkgs.mkShell {
-          packages = with pkgs; [
-            git
-            go_1_24
-          ];
+        inherit (pkgs) callPackage;
+      in
+      rec {
+        packages.default = callPackage ./default.nix { };
+        devShells.default = callPackage ./shell.nix { };
+        # nixosModules.default = import ./nix/module.nix;
+
+        overlays.default = final: prev: {
+          tailscale-nginx-auth = packages.default;
         };
       });
 }

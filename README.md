@@ -1,8 +1,14 @@
 # tailscale-forward-auth
 
-This is a fork of the upstream
-[tailscale-forward-auth](https://github.com/kevin-hanselman/tailscale-forward-auth),
-to nixify and add the ability to specify required application capabilities.
+[! IMPORTANT]
+> This is a fork of the upstream
+> [tailscale-forward-auth](https://github.com/kevin-hanselman/tailscale-forward-auth),
+> to nixify and add the ability to specify required application capabilities
+> via [Tailscale ACL Grants](https://tailscale.com/kb/1324/grants).
+> 
+> I also brought back the ability to listen on sockets, as well as listeners
+> passed by systemd. `tcpAddr`, `sockPath`, and systemd listeners can all be
+> used simultaneously.
 
 This is a basic example of how to implement a Tailscale authentication server
 for general use with proxies. It is derived from the [Tailscale nginx-auth
