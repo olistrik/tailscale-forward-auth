@@ -1,29 +1,32 @@
 {
-  description = "dev shell for nix people";
+  description = "Tailscale Forward Auth Nix Flake";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "nixpkgs";
   };
 
-  outputs = { self, flake-utils, nixpkgs, ... }:
-    flake-utils.lib.eachDefaultSystem
-      (system:
-        let
-          pkgs = import nixpkgs { inherit system; };
+  outputs = { self, nixpkgs, ... }:
+    let
+      forAllSystems = function:
+        nixpkgs.lib.genAttrs [
+          "x86_64-linux"
+          "aarch64-linux"
+        ]
+          (system: function nixpkgs.legacyPackages.${system});
+    in
+    {
+      packages = forAllSystems (pkgs: {
+        default = pkgs.callPackage ./default.nix { };
+      });
 
-          inherit (pkgs) callPackage;
-        in
-        {
-          packages.default = callPackage ./default.nix { };
-          devShells.default = callPackage ./shell.nix { };
-
-        }) // {
+      devShells = forAllSystems (pkgs: {
+        default = pkgs.callPackage ./shell.nix { };
+      });
 
       overlays.default = final: prev: {
         tailscale-forward-auth = self.packages.${final.system}.default;
-
       };
+
       nixosModules.default = import ./nixos/modules;
     };
 }

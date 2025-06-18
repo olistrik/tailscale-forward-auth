@@ -1,6 +1,6 @@
 { ... }: {
   imports = [
-    ./tailscaleForwardAuth.nix
+    ./tailscale-forward-auth.nix
     ./nginx.nix
   ];
 }

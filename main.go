@@ -25,11 +25,11 @@ import (
 var (
 	tcpAddr                  = flag.String("addr", "", "the address to listen on, for example 127.0.0.1:")
 	sockPath                 = flag.String("sockpath", "", "the filesystem path for the unix socket this service exposes")
-	headerRemoteIP           = flag.String("remote-ip-header", "X-Forwarded-For", "HTTP header field containing the remote IP")
-	headerRemotePort         = flag.String("remote-port-header", "X-Forwarded-Port", "HTTP header field containing the remote port")
-	headerPermitPrivate      = flag.String("permit-private-header", "X-Permit-Private", "HTTP header field to permit private network connections without tailscale")
-	headerExpectedTailnet    = flag.String("expected-tailnet-header", "X-Expected-Tailnet", "HTTP header field to set expected tailnet")
-	headerRequiresCapability = flag.String("requires-capability", "X-Requires-Capability", "HTTP header field to set the required application capability")
+	headerRemoteAddr         = flag.String("remote-addr-header", "Remote-Addr", "HTTP header field containing the remote IP Address")
+	headerRemotePort         = flag.String("remote-port-header", "Remote-Port", "HTTP header field containing the remote port")
+	headerPermitPrivate      = flag.String("permit-private-header", "Permit-Private", "HTTP header field to permit private network connections without tailscale")
+	headerExpectedTailnet    = flag.String("expected-tailnet-header", "Expected-Tailnet", "HTTP header field to set expected tailnet")
+	headerRequiresCapability = flag.String("requires-capability-header", "Requires-Capability", "HTTP header field to set the required application capability")
 	debug                    = flag.Bool("debug", false, "enable debug logging")
 )
 
@@ -52,10 +52,10 @@ func main() {
 			log.Printf("received request with header %+v", r.Header)
 		}
 
-		remoteHost := r.Header.Get(*headerRemoteIP)
+		remoteHost := r.Header.Get(*headerRemoteAddr)
 		if remoteHost == "" {
 			w.WriteHeader(http.StatusBadRequest)
-			log.Printf("missing header %s", *headerRemoteIP)
+			log.Printf("missing header %s", *headerRemoteAddr)
 			return
 		}
 

@@ -9,6 +9,7 @@ let
     getExe
     mkEnableOption
     mkPackageOption
+    mkRenamedOptionModule
     mkIf
     mkOption
     types
@@ -16,6 +17,13 @@ let
   cfg = config.services.tailscaleForwardAuth;
 in
 {
+
+  disabledModules = [ "services/networking/tailscale-auth.nix" ];
+  #
+  # imports = [
+  #   (mkRenamedOptionModule [ "services" "tailscaleAuth" ] [ "services" "tailscaleForwardAuth" ])
+  # ];
+
   options.services.tailscaleForwardAuth = {
     enable = mkEnableOption "tailscale-forward-auth, to authenticate users via tailscale";
 
